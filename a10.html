@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map and Granny Game Combo</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body, html { margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; background: #000; color: white; overflow-x: hidden; }
+        
+        /* Map Section */
+        #map-container { height: 50vh; width: 100%; border-bottom: 5px solid red; }
+        #map { height: 100%; width: 100%; }
+
+        /* Game Section */
+        #game-info { padding: 20px; text-align: center; background: #111; }
+        #game-canvas-container { position: relative; width: 100%; height: 50vh; display: none; }
+        
+        button {
+            background: red; color: white; border: none; padding: 15px 30px;
+            font-size: 20px; cursor: pointer; font-weight: bold; border-radius: 5px;
+        }
+        button:hover { background: darkred; }
+
+        #instructions { font-size: 12px; margin-top: 10px; color: #888; }
+    </style>
+</head>
+<body>
+
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <div id="game-info">
+        <h2>Duniya dekh li? Ab darr ka samna karo...</h2>
+        <button onclick="startGame()">ENTER GRANNY'S ROOM</button>
+        <p id="instructions">W, A, S, D to Move | Mouse to Look | ESC to Exit</p>
+    </div>
+
+    <div id="game-canvas-container">
+        <div id="horror-ui" style="position: absolute; top: 10px; left: 10px; color: red; z-index: 10;">
+            THEY ARE WATCHING...
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/js/controls/PointerLockControls.js"></script>
+
+    <script>
+        // --- WORLD MAP LOGIC ---
+        var worldMap = L.map('map').setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(worldMap);
+        L.marker([20.5937, 78.9629]).addTo(worldMap).bindPopup("India: Darr yahan se shuru hota hai!");
+
+        // --- GRANNY GAME LOGIC ---
+        let scene, camera, renderer, controls;
+
+        function initGame() {
+            const container = document.getElementById('game-canvas-container');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x050505);
+            scene.fog = new THREE.Fog(0x050505, 1, 15);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / (window.innerHeight/2), 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight / 2);
+            container.appendChild(renderer.domElement);
+
+            // Light (Torch)
+            const torch = new THREE.SpotLight(0xffffff, 1, 15, Math.PI / 6);
+            camera.add(torch);
+            torch.position.set(0, 0, 1);
+            torch.target = camera;
+            scene.add(camera);
+
+            // Room Floor
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshPhongMaterial({ color: 0x111111 }));
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+            // Granny & Grandpa Placeholders
+            function createEnemy(color, x, z) {
+                const group = new THREE.Group();
+                const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2, 0.5), new THREE.MeshPhongMaterial({ color: color }));
+                body.position.y = 1;
+                const eyeGeo = new THREE.SphereGeometry(0.06);
+                const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+                const e1 = new THREE.Mesh(eyeGeo, eyeMat); e1.position.set(-0.2, 1.7, 0.3);
+                const e2 = new THREE.Mesh(eyeGeo, eyeMat); e2.position.set(0.2, 1.7, 0.3);
+                group.add(body, e1, e2);
+                group.position.set(x, 0, z);
+                return group;
+            }
+
+            const granny = createEnemy(0x220000, 4, -6);
+            const grandpa = createEnemy(0x000022, -4, -8);
+            scene.add(granny, grandpa);
+
+            controls = new THREE.PointerLockControls(camera, document.body);
+
+            // Animation Loop
+            function animate() {
+                requestAnimationFrame(animate);
+                if (controls.isLocked) {
+                    granny.position.z += Math.sin(Date.now() * 0.002) * 0.03; // Granny moving
+                }
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        function startGame() {
+            document.getElementById('game-canvas-container').style.display = 'block';
+            if (!scene) initGame();
+            controls.lock();
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+    </script>
+</body>
+</html>
