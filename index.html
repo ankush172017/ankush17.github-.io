@@ -21,20 +21,20 @@
         .full-header {
             background: #ff4757; /* Bright Pink */
             width: 100%;
-            padding: 10px 30px;
+            padding: 10px 30px; /* Left padding 30px hai */
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-sizing: border-box;
-            height: 160px; /* Header ko thoda bada kiya taaki badi photo aa sake */
+            height: 160px;
         }
 
         /* Name Section (Left) */
         .header-content h1 {
             color: white;
             margin: 0;
-            font-size: 32px; /* Naam bhi thoda bada kiya */
+            font-size: 32px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -50,10 +50,10 @@
             font-size: 14px;
         }
 
-        /* Photo Icon (Right) - SIZE BADA KIYA */
+        /* Photo Icon (Right) - BADA SIZE */
         .photo-container {
-            width: 130px;  /* Size bada kar diya (pehle 70px tha) */
-            height: 130px; /* Size bada kar diya */
+            width: 130px;
+            height: 130px;
             background: white;
             padding: 4px;
             border-radius: 50%;
@@ -70,22 +70,23 @@
 
         /* --- MAIN AREA --- */
         .main-content {
-            padding: 20px;
+            padding: 20px 30px; /* Header ke barabar padding di taaki seedh me ho */
             flex: 1;
             position: relative;
         }
 
-        /* --- BIO DATA (Moved Left/Center) --- */
+        /* --- BIO DATA (Moved to LEFT under Name) --- */
         .bio-data-card {
             background: white;
-            width: 300px; /* Thoda chauda kiya */
+            width: 300px;
             padding: 15px;
             border-radius: 10px;
             border-left: 5px solid #ff4757;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             
-            /* Positioning Logic - MOVED LEFT (Center) */
-            margin: 0 auto 30px auto; /* Ye line isko beech me (thora left) le aayi */
+            /* Positioning Logic - STRICTLY LEFT */
+            margin: 0; /* Center hataya, ab ye left me rahega */
+            margin-bottom: 30px;
             text-align: left;
         }
 
@@ -108,13 +109,13 @@
 
         /* --- 500 FILES SECTION --- */
         .files-area {
-            width: 98%;
-            margin: 0 auto;
+            width: 100%;
+            margin: 0;
             padding: 20px;
             background: white;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            clear: both;
+            box-sizing: border-box; /* Padding ko andar rakhega */
         }
 
         h2 { color: #3742fa; margin-top: 0; font-size: 18px; }
