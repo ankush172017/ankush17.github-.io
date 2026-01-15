@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GTA V Web Remake</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Arial Black', sans-serif; }
+        
+        /* Loading/Start Screen */
+        #start-screen {
+            position: absolute; width: 100%; height: 100%; 
+            background: url('https://images.alphacoders.com/439/439546.jpg') center/cover;
+            z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+            padding-bottom: 50px;
+        }
+        #play-btn {
+            background: #fdf001; color: #000; padding: 20px 60px; font-size: 30px;
+            border: none; cursor: pointer; border-radius: 5px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* GTA Style UI */
+        #game-ui { display: none; pointer-events: none; }
+        .hud { position: absolute; bottom: 20px; left: 20px; width: 200px; }
+        .health-bar { width: 100%; height: 10px; background: rgba(0,0,0,0.5); border: 2px solid #fff; }
+        .health-fill { width: 80%; height: 100%; background: #2ecc71; }
+        .weapon-icon { position: absolute; top: 20px; right: 20px; width: 120px; height: 60px; background: rgba(0,0,0,0.5); border-radius: 10px; border: 2px solid #fff; color: white; text-align: center; line-height: 60px; }
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background: red; border-radius: 50%; transform: translate(-50%, -50%); }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <button id="play-btn" onclick="startGame()">START GAME</button>
+    </div>
+
+    <div id="game-ui">
+        <div id="crosshair"></div>
+        <div class="hud">
+            <div style="color: white; margin-bottom: 5px;">FRANKLIN</div>
+            <div class="health-bar"><div class="health-fill"></div></div>
+        </div>
+        <div class="weapon-icon">PISTOL 🔫</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/js/controls/PointerLockControls.js"></script>
+
+    <script>
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb); // Sky
+        scene.fog = new THREE.Fog(0x87ceeb, 10, 150);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Lights
+        const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+        sun.position.set(50, 100, 50);
+        scene.add(sun, new THREE.AmbientLight(0x404040, 0.6));
+
+        // Ground (Asli Road jaisa texture)
+        const planeGeo = new THREE.PlaneGeometry(2000, 2000);
+        const planeMat = new THREE.MeshStandardMaterial({color: 0x222222});
+        const floor = new THREE.Mesh(planeGeo, planeMat);
+        floor.rotation.x = -Math.PI/2;
+        scene.add(floor);
+
+        // Buildings & City Generation (200+ buildings)
+        const cityGroup = new THREE.Group();
+        for(let i=0; i<300; i++){
+            const h = Math.random() * 40 + 5;
+            const bGeo = new THREE.BoxGeometry(10, h, 10);
+            const bMat = new THREE.MeshStandardMaterial({
+                color: Math.random() > 0.5 ? 0x555555 : 0x777777,
+                roughness: 0.1
+            });
+            const b = new THREE.Mesh(bGeo, bMat);
+            b.position.set(Math.random()*800-400, h/2, Math.random()*800-400);
+            cityGroup.add(b);
+        }
+        scene.add(cityGroup);
+
+        // Car Placeholders (200 cars)
+        const cars = [];
+        for(let i=0; i<200; i++){
+            const car = new THREE.Mesh(new THREE.BoxGeometry(4, 2, 2), new THREE.MeshStandardMaterial({color: Math.random()*0xffffff}));
+            car.position.set(Math.random()*600-300, 1, Math.random()*600-300);
+            scene.add(car);
+            cars.push(car);
+        }
+
+        // Gun Model
+        const gun = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.8), new THREE.MeshStandardMaterial({color: 0x000000}));
+        gun.position.set(0.4, -0.4, -0.8);
+        camera.add(gun);
+        scene.add(camera);
+
+        // Controls
+        const controls = new THREE.PointerLockControls(camera, document.body);
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-ui').style.display = 'block';
+            controls.lock();
+        }
+
+        // Shooting with Flash
+        window.addEventListener('mousedown', () => {
+            if(controls.isLocked){
+                const flash = new THREE.PointLight(0xffaa00, 10, 5);
+                flash.position.set(0.4, -0.4, -1.2);
+                camera.add(flash);
+                setTimeout(() => camera.remove(flash), 50);
+                // Add sound or hit logic here
+            }
+        });
+
+        // Movement
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+        document.addEventListener('keydown', (e) => {
+            if(e.code === 'KeyW') moveForward = true;
+            if(e.code === 'KeyS') moveBackward = true;
+            if(e.code === 'KeyA') moveLeft = true;
+            if(e.code === 'KeyD') moveRight = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            if(e.code === 'KeyW') moveForward = false;
+            if(e.code === 'KeyS') moveBackward = false;
+            if(e.code === 'KeyA') moveLeft = false;
+            if(e.code === 'KeyD') moveRight = false;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(controls.isLocked) {
+                if(moveForward) controls.moveForward(0.3);
+                if(moveBackward) controls.moveForward(-0.3);
+                if(moveLeft) controls.moveRight(-0.3);
+                if(moveRight) controls.moveRight(0.3);
+            }
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
