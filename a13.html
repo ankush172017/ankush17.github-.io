@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D City Game Prototype</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #overlay {
+            position: absolute; top: 10px; left: 10px; color: white; z-index: 10;
+        }
+        #instructions {
+            position: absolute; bottom: 20px; width: 100%; text-align: center;
+            color: #ccc; font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="overlay">
+        <h2>3D CITY PROTOTYPE</h2>
+        <p>W,A,S,D to Move | Mouse to Look</p>
+    </div>
+
+    <div id="instructions">
+        Click to enter the city. Watch out for the moving car!
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/js/controls/PointerLockControls.js"></script>
+
+    <script>
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x77bbff); // Sky color
+        scene.fog = new THREE.Fog(0x77bbff, 1, 100);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // --- LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0xaaaaaa);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 10, 7);
+        scene.add(dirLight);
+
+        // --- GROUND (Road) ---
+        const groundTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/crate.gif'); // Placeholder texture
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshPhongMaterial({ map: groundTexture, color: 0x555555 }));
+        ground.rotation.x = -Math.PI / 2;
+        scene.add(ground);
+
+        // --- BUILDINGS ---
+        function createBuilding(x, z, width, depth, height, color) {
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            const material = new THREE.MeshPhongMaterial({ color: color });
+            const building = new THREE.Mesh(geometry, material);
+            building.position.set(x, height / 2, z);
+            scene.add(building);
+            return building;
+        }
+
+        createBuilding(-20, -10, 10, 10, 30, 0x888888);
+        createBuilding(15, 20, 8, 8, 40, 0xaaaaaa);
+        createBuilding(0, -30, 12, 12, 25, 0xbbbbbb);
+        createBuilding(-30, 25, 15, 15, 50, 0x999999);
+
+        // --- CAR (Simple Box) ---
+        const carBody = new THREE.Mesh(new THREE.BoxGeometry(4, 1.5, 2), new THREE.MeshPhongMaterial({ color: 0x0000ff })); // Blue car
+        carBody.position.set(0, 0.75, 0);
+        scene.add(carBody);
+
+        let carSpeed = 0.05;
+        let carDirection = 1; // 1 for forward, -1 for backward
+
+        // --- HUMAN (Simple Cylinder) ---
+        const humanBody = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2, 16), new THREE.MeshPhongMaterial({ color: 0x00ff00 })); // Green human
+        humanBody.position.set(10, 1, -15);
+        scene.add(humanBody);
+
+        // --- GUN (Camera ke saath attached) ---
+        const gun = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.5), new THREE.MeshPhongMaterial({ color: 0x444444 }));
+        gun.position.set(0.5, -0.3, -1); // Camera ke relative position
+        camera.add(gun); // Gun ko camera ka child bana diya
+        scene.add(camera); // Camera ko scene mein add karna zaroori hai
+
+        // --- CONTROLS (First Person) ---
+        const controls = new THREE.PointerLockControls(camera, document.body);
+        document.body.addEventListener('click', () => controls.lock());
+
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyW') moveForward = true;
+            if (e.code === 'KeyS') moveBackward = true;
+            if (e.code === 'KeyA') moveLeft = true;
+            if (e.code === 'KeyD') moveRight = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'KeyW') moveForward = false;
+            if (e.code === 'KeyS') moveBackward = false;
+            if (e.code === 'KeyA') moveLeft = false;
+            if (e.code === 'KeyD') moveRight = false;
+        });
+
+        // --- ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (controls.isLocked) {
+                velocity.x -= velocity.x * 10.0 * 0.016;
+                velocity.z -= velocity.z * 10.0 * 0.016;
+
+                direction.z = Number(moveForward) - Number(moveBackward);
+                direction.x = Number(moveRight) - Number(moveLeft);
+                direction.normalize();
+
+                if (moveForward || moveBackward) velocity.z -= direction.z * 40.0 * 0.016;
+                if (moveLeft || moveRight) velocity.x -= direction.x * 40.0 * 0.016;
+
+                controls.moveRight(-velocity.x * 0.016);
+                controls.moveForward(-velocity.z * 0.016);
+
+                // Car Movement (Forward and backward along X-axis)
+                carBody.position.x += carSpeed * carDirection;
+                if (carBody.position.x > 30 || carBody.position.x < -30) {
+                    carDirection *= -1; // Change direction
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- RESIZE HANDLER ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
