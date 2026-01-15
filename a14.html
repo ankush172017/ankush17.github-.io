@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GTA V HTML Prototype</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; }
+        #crosshair {
+            position: absolute; top: 50%; left: 50%;
+            width: 20px; height: 20px;
+            border: 2px solid white; border-radius: 50%;
+            transform: translate(-50%, -50%); pointer-events: none;
+        }
+        #ui {
+            position: absolute; bottom: 20px; left: 20px;
+            color: lime; font-family: 'Arial'; font-size: 20px;
+            text-shadow: 2px 2px black;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="crosshair"></div>
+    <div id="ui">Health: 100 | Ammo: 30/∞ <br> Click to Shoot | WASD to Walk</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/js/controls/PointerLockControls.js"></script>
+
+    <script>
+        // 1. Scene & Camera Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb); // Sky Blue
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // 2. Lights
+        const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+        scene.add(light);
+
+        // 3. Ground & Buildings
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshPhongMaterial({color: 0x333333}));
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+
+        // 200 Buildings generating loop
+        for(let i=0; i<200; i++) {
+            let h = Math.random() * 30 + 10;
+            const bGeo = new THREE.BoxGeometry(10, h, 10);
+            const bMat = new THREE.MeshPhongMaterial({color: 0x888888});
+            const b = new THREE.Mesh(bGeo, bMat);
+            b.position.set(Math.random()*800 - 400, h/2, Math.random()*800 - 400);
+            scene.add(b);
+        }
+
+        // 4. Gun Model (Attached to Camera)
+        const gunGeo = new THREE.BoxGeometry(0.2, 0.3, 1);
+        const gunMat = new THREE.MeshStandardMaterial({color: 0x111111});
+        const gun = new THREE.Mesh(gunGeo, gunMat);
+        gun.position.set(0.5, -0.4, -1);
+        camera.add(gun);
+        scene.add(camera);
+
+        // 5. Humans / Targets
+        const humans = [];
+        function createHuman() {
+            const hGeo = new THREE.CylinderGeometry(0.5, 0.5, 2);
+            const hMat = new THREE.MeshPhongMaterial({color: 0xff0000});
+            const h = new THREE.Mesh(hGeo, hMat);
+            h.position.set(Math.random()*100 - 50, 1, Math.random()*100 - 50);
+            scene.add(h);
+            humans.push(h);
+        }
+        for(let i=0; i<50; i++) createHuman();
+
+        // 6. Controls & Shooting
+        const controls = new THREE.PointerLockControls(camera, document.body);
+        document.body.addEventListener('click', () => {
+            controls.lock();
+            shoot();
+        });
+
+        function shoot() {
+            // Shooting Logic using Raycaster
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(new THREE.Vector2(), camera);
+            const intersects = raycaster.intersectObjects(humans);
+            if (intersects.length > 0) {
+                scene.remove(intersects[0].object); // Human "dies" (removes from scene)
+            }
+        }
+
+        // Movement Logic
+        let moveF = false, moveB = false, moveL = false, moveR = false;
+        document.addEventListener('keydown', (e) => {
+            if(e.code === 'KeyW') moveF = true;
+            if(e.code === 'KeyS') moveB = true;
+            if(e.code === 'KeyA') moveL = true;
+            if(e.code === 'KeyD') moveR = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            if(e.code === 'KeyW') moveF = false;
+            if(e.code === 'KeyS') moveB = false;
+            if(e.code === 'KeyA') moveL = false;
+            if(e.code === 'KeyD') moveR = false;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(controls.isLocked) {
+                if(moveF) controls.moveForward(0.2);
+                if(moveB) controls.moveForward(-0.2);
+                if(moveL) controls.moveRight(-0.2);
+                if(moveR) controls.moveRight(0.2);
+            }
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
