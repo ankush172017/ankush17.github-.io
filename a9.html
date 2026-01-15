@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horror Granny & Grandpa - 3D</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
+        #overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: red; text-align: center; pointer-events: none;
+        }
+        #instructions {
+            position: absolute; bottom: 20px; width: 100%; text-align: center;
+            color: white; font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="overlay">
+        <h1 style="font-size: 50px; letter-spacing: 10px; opacity: 0.5;">RUN!</h1>
+    </div>
+
+    <div id="instructions">
+        W, A, S, D to Move | Mouse to Look | ESC to Exit
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/js/controls/PointerLockControls.js"></script>
+
+    <script>
+        // 1. Scene Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050505);
+        scene.fog = new THREE.Fog(0x050505, 1, 15); // Horror fog effect
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // 2. Lighting (Daraavani Lights)
+        const flashLight = new THREE.SpotLight(0xffffff, 1, 15, Math.PI / 6, 0.5);
+        camera.add(flashLight);
+        flashLight.position.set(0, 0, 1);
+        flashLight.target = camera; 
+        scene.add(camera);
+
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.2); // Boht halki light
+        scene.add(ambientLight);
+
+        // 3. Room (Walls)
+        const textureLoader = new THREE.TextureLoader();
+        const wallMat = new THREE.MeshPhongMaterial({ color: 0x221100 }); // Purani deewarein
+        
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshPhongMaterial({ color: 0x111111 }));
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+
+        // 4. Granny & Grandpa (Daraavne Placeholders)
+        function createGhost(color, x, z) {
+            const group = new THREE.Group();
+            // Body
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.8, 0.5), new THREE.MeshPhongMaterial({ color: color }));
+            body.position.y = 0.9;
+            group.add(body);
+            // Glowing Eyes
+            const eyeGeo = new THREE.SphereGeometry(0.05);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
+            eye1.position.set(-0.2, 1.5, 0.3);
+            const eye2 = new THREE.Mesh(eyeGeo, eyeMat);
+            eye2.position.set(0.2, 1.5, 0.3);
+            group.add(eye1, eye2);
+            
+            group.position.set(x, 0, z);
+            return group;
+        }
+
+        const granny = createGhost(0x330000, 3, -5); // Granny (Dark Red)
+        const grandpa = createGhost(0x000033, -3, -8); // Grandpa (Dark Blue)
+        scene.add(granny, grandpa);
+
+        // 5. Controls
+        const controls = new THREE.PointerLockControls(camera, document.body);
+        document.body.addEventListener('click', () => controls.lock());
+
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+        const onKeyDown = (e) => {
+            if (e.code === 'KeyW') moveForward = true;
+            if (e.code === 'KeyS') moveBackward = true;
+            if (e.code === 'KeyA') moveLeft = true;
+            if (e.code === 'KeyD') moveRight = true;
+        };
+        const onKeyUp = (e) => {
+            if (e.code === 'KeyW') moveForward = false;
+            if (e.code === 'KeyS') moveBackward = false;
+            if (e.code === 'KeyA') moveLeft = false;
+            if (e.code === 'KeyD') moveRight = false;
+        };
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('keyup', onKeyUp);
+
+        // 6. Animation Loop
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (controls.isLocked) {
+                velocity.x -= velocity.x * 10.0 * 0.016;
+                velocity.z -= velocity.z * 10.0 * 0.016;
+
+                direction.z = Number(moveForward) - Number(moveBackward);
+                direction.x = Number(moveRight) - Number(moveLeft);
+                direction.normalize();
+
+                if (moveForward || moveBackward) velocity.z -= direction.z * 40.0 * 0.016;
+                if (moveLeft || moveRight) velocity.x -= direction.x * 40.0 * 0.016;
+
+                controls.moveRight(-velocity.x * 0.016);
+                controls.moveForward(-velocity.z * 0.016);
+                
+                // Granny ko dhire dhire move karwana
+                granny.position.z += Math.sin(Date.now() * 0.001) * 0.02;
+                grandpa.position.x += Math.cos(Date.now() * 0.001) * 0.01;
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
