@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haunted Lab - Action Horror</title>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #050505;
+            color: #ff0000;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #game-wrapper {
+            position: relative;
+            margin-top: 20px;
+            border: 4px solid #440000;
+            box-shadow: 0 0 30px #ff0000;
+        }
+
+        canvas { background: #000; cursor: none; }
+
+        /* Inventory UI (Free Fire Style) */
+        #inventory {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #555;
+        }
+
+        .slot {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #888;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            cursor: pointer;
+            background: #222;
+        }
+
+        .slot.active { border-color: #ff0000; background: #440000; }
+
+        #ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            font-family: 'Creepster', cursive;
+            font-size: 24px;
+        }
+
+        #start-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .blood-btn {
+            background: #800000;
+            color: white;
+            padding: 20px 40px;
+            font-size: 30px;
+            font-family: 'Creepster', cursive;
+            border: none;
+            cursor: pointer;
+            border-radius: 50px;
+        }
+        
+        .blood-btn:hover { background: red; box-shadow: 0 0 20px red; }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <canvas id="gameCanvas" width="900" height="550"></canvas>
+        
+        <div id="ui-overlay">
+            HP: <span id="hp">100</span> | MISSION: <span id="mission">Room se bahar niklo</span>
+        </div>
+
+        <div id="start-screen">
+            <h1 style="font-size: 80px; margin-bottom: 0;">HAUNTED LAB</h1>
+            <p style="color: #666;">Room mein weapon uthao aur darwaza kholo...</p>
+            <button class="blood-btn" onclick="startGame()">START GAME</button>
+        </div>
+
+        <div id="inventory">
+            <div class="slot active" id="slot-0" onclick="selectWeapon(0)">MUKKA</div>
+            <div class="slot" id="slot-1" onclick="selectWeapon(1)">CHAKU</div>
+            <div class="slot" id="slot-2" onclick="selectWeapon(2)">TALWAR</div>
+            <div class="slot" id="slot-3" onclick="selectWeapon(3)">GUN (AK47)</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let gameState = {
+            running: false,
+            room: 'cell', // 'cell' or 'hallway'
+            hp: 100,
+            weapon: 0, // 0: Hand, 1: Knife, 2: Sword, 3: Gun
+            itemsFound: { knife: false, sword: false, gun: false, key: false },
+            enemy: { x: 1000, y: 300, health: 100, active: false, dead: false },
+            playerPos: { x: 150, y: 400 },
+            mouseX: 0, mouseY: 0,
+            flashOpacity: 0
+        };
+
+        function selectWeapon(id) {
+            // Sirf wahi weapon select hoga jo mil chuka hai
+            if(id === 0) gameState.weapon = 0;
+            if(id === 1 && gameState.itemsFound.knife) gameState.weapon = 1;
+            if(id === 2 && gameState.itemsFound.sword) gameState.weapon = 2;
+            if(id === 3 && gameState.itemsFound.gun) gameState.weapon = 3;
+
+            document.querySelectorAll('.slot').forEach(s => s.classList.remove('active'));
+            document.getElementById('slot-' + gameState.weapon).classList.add('active');
+        }
+
+        function startGame() {
+            gameState.running = true;
+            document.getElementById('start-screen').style.display = 'none';
+            gameLoop();
+        }
+
+        // --- Core Game Logic ---
+        canvas.addEventListener('mousemove', e => {
+            const rect = canvas.getBoundingClientRect();
+            gameState.mouseX = e.clientX - rect.left;
+            gameState.mouseY = e.clientY - rect.top;
+        });
+
+        canvas.addEventListener('mousedown', () => {
+            if(!gameState.running) return;
+            attack();
+        });
+
+        function attack() {
+            // Gun shoot effect
+            if(gameState.weapon === 3) {
+                gameState.flashOpacity = 1; // Muzzle flash
+            }
+
+            // Check if hitting enemy (Budhiya)
+            if(gameState.enemy.active && !gameState.enemy.dead) {
+                let dist = Math.hypot(gameState.mouseX - gameState.enemy.x, gameState.mouseY - gameState.enemy.y);
+                if(dist < 100) {
+                    let damage = [5, 20, 50, 40][gameState.weapon];
+                    gameState.enemy.health -= damage;
+                    if(gameState.enemy.health <= 0) {
+                        gameState.enemy.dead = true;
+                        document.getElementById('mission').innerText = "Bhootni mari gayi! Jeet gaye!";
+                    }
+                }
+            }
+
+            // Interaction in Room
+            if(gameState.room === 'cell') {
+                // Pick up items
+                if(distTo(100, 100) < 50) { gameState.itemsFound.knife = true; updateSlot(1, "CHAKU"); }
+                if(distTo(300, 100) < 50) { gameState.itemsFound.sword = true; updateSlot(2, "TALWAR"); }
+                if(distTo(500, 100) < 50) { gameState.itemsFound.gun = true; updateSlot(3, "AK47"); }
+                if(distTo(800, 300) < 80) openGate();
+            }
+        }
+
+        function distTo(x, y) { return Math.hypot(gameState.mouseX - x, gameState.mouseY - y); }
+        
+        function updateSlot(id, name) { 
+            let s = document.getElementById('slot-' + id);
+            s.style.color = "yellow"; 
+            s.innerText = name;
+        }
+
+        function openGate() {
+            gameState.room = 'hallway';
+            gameState.enemy.active = true;
+            gameState.enemy.x = 700;
+            document.getElementById('mission').innerText = "BUDHIYA AA GAYI! MAARO USE!";
+        }
+
+        // --- Drawing ---
+        function draw() {
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Blood on walls
+            ctx.fillStyle = "rgba(100, 0, 0, 0.5)";
+            ctx.beginPath(); ctx.arc(200, 200, 60, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(700, 100, 40, 0, Math.PI*2); ctx.fill();
+
+            if(gameState.room === 'cell') {
+                // Draw Weapons to pick up
+                if(!gameState.itemsFound.knife) drawItem(100, 100, "🔪", "Chaku");
+                if(!gameState.itemsFound.sword) drawItem(300, 100, "⚔️", "Talwar");
+                if(!gameState.itemsFound.gun) drawItem(500, 100, "🔫", "Gun");
+                
+                // Gate
+                ctx.fillStyle = "#333";
+                ctx.fillRect(800, 150, 50, 250);
+                ctx.fillStyle = "white"; ctx.fillText("EXIT GATE", 800, 140);
+            }
+
+            // Draw Enemy (Budhiya/Bhoot)
+            if(gameState.enemy.active) {
+                let x = gameState.enemy.x;
+                let y = gameState.enemy.y;
+                
+                if(!gameState.enemy.dead) {
+                    // Creepy Budhiya Drawing
+                    ctx.fillStyle = "#eee"; // Dirty dress
+                    ctx.beginPath(); ctx.moveTo(x, y+100); ctx.lineTo(x-40, y+250); ctx.lineTo(x+40, y+250); ctx.fill();
+                    ctx.fillStyle = "#faddd0"; // Head
+                    ctx.beginPath(); ctx.arc(x, y+80, 30, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = "black"; // Long Hair
+                    ctx.fillRect(x-35, y+60, 70, 100);
+                    ctx.fillStyle = "red"; // Eyes
+                    ctx.fillRect(x-15, y+75, 5, 5); ctx.fillRect(x+10, y+75, 5, 5);
+                    
+                    // Enemy health bar
+                    ctx.fillStyle = "red";
+                    ctx.fillRect(x-50, y+30, gameState.enemy.health, 5);
+                } else {
+                    // Dead body with blood
+                    ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
+                    ctx.beginPath(); ctx.ellipse(x, y+240, 100, 30, 0, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = "#333";
+                    ctx.fillText("MAR GAYI", x-30, y+230);
+                }
+            }
+
+            // Muzzle Flash
+            if(gameState.flashOpacity > 0) {
+                ctx.fillStyle = `rgba(255, 255, 0, ${gameState.flashOpacity})`;
+                ctx.beginPath(); ctx.arc(gameState.mouseX, gameState.mouseY, 40, 0, Math.PI*2); ctx.fill();
+                gameState.flashOpacity -= 0.1;
+            }
+
+            // Player Cursor (Hand/Weapon)
+            ctx.font = "40px Arial";
+            let weaponIcon = ["👊", "🔪", "⚔️", "🔫"][gameState.weapon];
+            ctx.fillText(weaponIcon, gameState.mouseX - 20, gameState.mouseY + 20);
+
+            // Flashlight Dark Effect
+            let grad = ctx.createRadialGradient(gameState.mouseX, gameState.mouseY, 50, gameState.mouseX, gameState.mouseY, 400);
+            grad.addColorStop(0, "rgba(0,0,0,0)");
+            grad.addColorStop(1, "rgba(0,0,0,0.92)");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0,0,canvas.width, canvas.height);
+        }
+
+        function drawItem(x, y, icon, label) {
+            ctx.font = "30px Arial";
+            ctx.fillText(icon, x, y);
+            ctx.font = "12px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText(label, x, y + 20);
+        }
+
+        function gameLoop() {
+            if(gameState.running) {
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+    </script>
+</body>
+</html>
