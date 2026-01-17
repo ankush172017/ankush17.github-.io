@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haunted Lab Escape</title>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Metal+Mania&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000;
+            color: #d00000; /* Blood red text */
+            font-family: 'Metal Mania', cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            border: 5px solid #330000;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.3);
+            background: #111;
+        }
+
+        canvas {
+            display: block;
+            cursor: crosshair; /* Spooky cursor */
+        }
+
+        /* Start Screen Overlay */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Creepster', cursive;
+            font-size: 4em;
+            text-shadow: 4px 4px #330000;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        p { font-size: 1.5em; color: #aaa; }
+
+        .btn-start {
+            background: #500000;
+            color: #ffcccc;
+            border: 3px solid #ff0000;
+            padding: 15px 40px;
+            font-size: 2em;
+            font-family: 'Creepster', cursive;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-start:hover { background: #ff0000; color: #000; box-shadow: 0 0 20px red; }
+
+        /* Message Area */
+        #message-area {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1.2em;
+            pointer-events: none; /* Clicks pass through */
+            display: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; text-shadow: 0 0 20px red; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div id="message-area"></div>
+
+        <div id="start-screen">
+            <h1>THE HAUNTED LAB</h1>
+            <p>Something terrible happened here...</p>
+            <p>Find the key. Escape alive.</p>
+            <button class="btn-start" onclick="startGame()">ENTER IF YOU DARE</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('start-screen');
+        const messageArea = document.getElementById('message-area');
+
+        let gameState = {
+            isStarted: false,
+            hasKey: false,
+            gameOver: false,
+            mouseX: 0,
+            mouseY: 0
+        };
+
+        // --- Game Assets (Programmer Art) ---
+        const objects = [
+            { name: 'door', x: 650, y: 150, w: 120, h: 350, color: '#3a1f1f', interact: handleDoor },
+            { name: 'cabinet', x: 50, y: 300, w: 150, h: 200, color: '#2a2a2a', interact: handleCabinet },
+            { name: 'body', x: 250, y: 480, w: 200, h: 60, color: '#cccccc', interact: handleBody }, // Covered Body
+            { name: 'table', x: 300, y: 250, w: 250, h: 100, color: '#444', interact: handleTable }
+        ];
+
+        // Blood splatters (randomly generated initially)
+        const bloodStains = [];
+        for(let i=0; i<20; i++) {
+            bloodStains.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 30 + 5,
+                opacity: Math.random() * 0.5 + 0.2
+            });
+        }
+
+        // --- Main Functions ---
+
+        function startGame() {
+            gameState.isStarted = true;
+            startScreen.style.display = 'none';
+            showMessage("Ghor andhera hai... mujhe bahar nikalna hoga.");
+            gameLoop(); // Start animation loop
+        }
+
+        function showMessage(text, duration = 3000) {
+            messageArea.innerText = text;
+            messageArea.style.display = 'block';
+            setTimeout(() => {
+                messageArea.style.display = 'none';
+            }, duration);
+        }
+
+        // --- Interaction Handlers ---
+
+        function handleDoor() {
+            if (gameState.hasKey) {
+                gameState.gameOver = true;
+                showMessage("Darwaza khul gaya! Aap bach gaye!", 5000);
+                // In a real game, proceed to next level or end screen
+            } else {
+                showMessage("Darwaza lock hai. Mujhe chabi chahiye.");
+            }
+        }
+
+        function handleCabinet() {
+            if (!gameState.hasKey) {
+                gameState.hasKey = true;
+                showMessage("Mujhe ek purani chabi mili!");
+            } else {
+                showMessage("Cabinet khali hai.");
+            }
+        }
+
+        function handleBody() {
+            // Scary interaction
+            showMessage("हे भगवान! यह... यह मरा हुआ है। मुझे इसे नहीं छूना चाहिए।");
+             // Optional: Add a scary sound effect here if you know how.
+        }
+
+        function handleTable() {
+            showMessage("Table par ajeeb se chemical rakhe hain.");
+        }
+
+
+        // --- Drawing Functions (Visuals) ---
+
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Base Background (Dark Lab Walls)
+            // Create a gradient for creepy lighting
+            let bgGradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 100, canvas.width/2, canvas.height/2, 600);
+            bgGradient.addColorStop(0, '#1a1a1a');
+            bgGradient.addColorStop(1, '#000000');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Draw Blood Stains (Khoon ke dhabbe)
+            bloodStains.forEach(stain => {
+                ctx.beginPath();
+                ctx.arc(stain.x, stain.y, stain.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(138, 3, 3, ${stain.opacity})`; // Deep red with transparency
+                ctx.fill();
+            });
+
+            // 3. Draw Objects
+            objects.forEach(obj => {
+                ctx.fillStyle = obj.color;
+                
+                if (obj.name === 'body') {
+                    // Draw covered body shaped like a mound on the floor
+                    ctx.beginPath();
+                    ctx.moveTo(obj.x, obj.y + obj.h);
+                    ctx.quadraticCurveTo(obj.x + obj.w/2, obj.y - 30, obj.x + obj.w, obj.y + obj.h);
+                    ctx.fill();
+                    // Add fold lines
+                    ctx.strokeStyle = '#999'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(obj.x+50, obj.y+40); ctx.lineTo(obj.x+70, obj.y+10); ctx.stroke();
+                } else if (obj.name === 'door') {
+                    ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                    ctx.fillStyle = '#111'; // Door knob
+                    ctx.beginPath(); ctx.arc(obj.x + 100, obj.y + 200, 8, 0, Math.PI*2); ctx.fill();
+                } else {
+                    // Simple rectangles for other furniture
+                    ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                }
+            });
+
+            // 4. Flickering Light Effect (Atmosphere)
+            if (Math.random() > 0.9) {
+                ctx.fillStyle = 'rgba(0,0,0,0.4)'; // Sudden darkness flicker
+                ctx.fillRect(0,0,canvas.width, canvas.height);
+            }
+
+            // 5. Flashlight Effect (Optional: makes it scarier)
+            // Creates darkness everywhere except around the mouse
+            let gradient = ctx.createRadialGradient(gameState.mouseX, gameState.mouseY, 50, gameState.mouseX, gameState.mouseY, 250);
+            gradient.addColorStop(0, 'rgba(0,0,0,0)'); // Transparent center
+            gradient.addColorStop(1, 'rgba(0,0,0,0.95)'); // Dark edges
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+
+        // --- Event Listeners & Game Loop ---
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            gameState.mouseX = e.clientX - rect.left;
+            gameState.mouseY = e.clientY - rect.top;
+        });
+
+        canvas.addEventListener('click', (e) => {
+            if (!gameState.isStarted || gameState.gameOver) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            // Check if an object was clicked
+            for (let obj of objects) {
+                if (clickX > obj.x && clickX < obj.x + obj.w &&
+                    clickY > obj.y && clickY < obj.y + obj.h) {
+                    obj.interact();
+                    break; // Stop checking after first hit
+                }
+            }
+        });
+
+        function gameLoop() {
+            if (!gameState.gameOver) {
+                drawScene();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+    </script>
+</body>
+</html>
