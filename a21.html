@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gudiya Sajao Game (Doll Dress Up)</title>
+    <style>
+        /* --- CSS Styling (Design) --- */
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #ffdde1, #ee9ca7); /* Pinkish Background */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #d63384;
+            text-shadow: 2px 2px #fff;
+            margin-bottom: 10px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            gap: 20px;
+            max-width: 800px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        canvas {
+            background: #fff;
+            border: 4px solid #ff8fab;
+            border-radius: 15px;
+            /* Background scene for the doll */
+            background-image: radial-gradient(circle, #ffffff 20%, #fce4ec 80%);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 200px;
+        }
+
+        .control-group {
+            background: #fff0f6;
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #ffc2d1;
+        }
+
+        .control-group h3 {
+            margin: 0 0 10px 0;
+            color: #c71585;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .btn-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px 5px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: transform 0.1s, background 0.3s;
+            color: white;
+        }
+        
+        button:active { transform: scale(0.95); }
+
+        /* Button themes */
+        .btn-hair { background: linear-gradient(45deg, #F0E68C, #DAA520); color: #333; }
+        .btn-dress { background: linear-gradient(45deg, #ff9a9e, #fad0c4); color: #333; }
+        .btn-shoes { background: linear-gradient(45deg, #a18cd1, #fbc2eb); color: #333; }
+        .btn-acc { background: linear-gradient(45deg, #84fab0, #8fd3f4); color: #333; }
+
+    </style>
+</head>
+<body>
+
+    <h1>🎀 Gudiya Sajao (Doll Dress Up) 🎀</h1>
+
+    <div class="game-container">
+        <canvas id="dollCanvas" width="400" height="600"></canvas>
+
+        <div class="controls">
+            
+            <div class="control-group">
+                <h3>💇‍♀️ Balveer (Hair)</h3>
+                <div class="btn-row">
+                     <button class="btn-hair" onclick="cycleStyle('hairStyle')">Style Badlo</button>
+                     <button class="btn-hair" onclick="cycleColor('hairColor')">Rang Badlo</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>👗 Kapda (Dress)</h3>
+                <div class="btn-row">
+                    <button class="btn-dress" onclick="cycleStyle('dressStyle')">Design Badlo</button>
+                    <button class="btn-dress" onclick="cycleColor('dressColor')">Rang Badlo</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>👠 Sleeper (Shoes)</h3>
+                 <div class="btn-row">
+                    <button class="btn-shoes" onclick="cycleStyle('shoeStyle')">Style Badlo</button>
+                 </div>
+            </div>
+
+            <div class="control-group">
+                <h3>👑 Dold (Accessories)</h3>
+                 <div class="btn-row">
+                    <button class="btn-acc" onclick="cycleStyle('accStyle')">Gahne Badlo</button>
+                 </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        /* --- JavaScript Logic (The Brain of the Game) --- */
+        const canvas = document.getElementById('dollCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game State - Stores current choices
+        let gameState = {
+            hairStyle: 0,
+            hairColor: 0,
+            dressStyle: 0,
+            dressColor: 0,
+            shoeStyle: 0,
+            accStyle: 0
+        };
+
+        // Asset Options & Counts
+        const options = {
+            hairStylesCount: 4,
+            hairColors: ['#8B4513', '#F0E68C', '#2c3e50', '#e74c3c'], // Brown, Blonde, Dark, Red
+            dressStylesCount: 4,
+            dressColors: ['#ff6b6b', '#54a0ff', '#1dd1a1', '#f368e0'], // Pink, Blue, Green, Purple
+            shoeStylesCount: 3,
+            accStylesCount: 3 // 0=none, 1=necklace, 2=crown
+        };
+
+
+        // --- Control Functions ---
+        function cycleStyle(attribute) {
+            let countMax = options[attribute + 'sCount'];
+            gameState[attribute] = (gameState[attribute] + 1) % countMax;
+            drawGame();
+        }
+
+        function cycleColor(attribute) {
+            let countMax = options[attribute + 's'].length;
+            gameState[attribute] = (gameState[attribute] + 1) % countMax;
+            drawGame();
+        }
+
+
+        // --- Drawing Functions (Creating the Visuals) ---
+
+        // Helper function to draw rounded shapes (good for cartoon clothes)
+        function drawOval(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.ellipse(x, y, w/2, h/2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function drawBaseDoll() {
+            const skinColor = '#faddd0';
+            const outline = '#e0c0b6';
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = outline;
+            ctx.fillStyle = skinColor;
+
+            // Legs
+            drawOval(175, 450, 40, 180, skinColor); // Left
+            drawOval(225, 450, 40, 180, skinColor); // Right
+            
+            // Torso (Body)
+            ctx.beginPath();
+            ctx.moveTo(160, 220); // Shoulders
+            ctx.lineTo(240, 220);
+            ctx.lineTo(230, 380); // Hips
+            ctx.lineTo(170, 380);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            // Arms
+            drawOval(130, 280, 30, 140, skinColor); // Left
+            drawOval(270, 280, 30, 140, skinColor); // Right
+
+            // Neck
+            drawOval(200, 210, 30, 40, skinColor);
+
+            // Head
+            drawOval(200, 150, 100, 120, skinColor);
+            ctx.stroke(); // Outline head
+
+            // Face Features
+            // Eyes
+            ctx.fillStyle = '#fff'; drawOval(180, 145, 20, 15, '#fff'); drawOval(220, 145, 20, 15, '#fff');
+            ctx.fillStyle = '#6D4C41'; drawOval(180, 145, 8, 8, '#6D4C41'); drawOval(220, 145, 8, 8, '#6D4C41');
+            // Smile
+            ctx.beginPath(); ctx.arc(200, 170, 15, 0.2 * Math.PI, 0.8 * Math.PI); ctx.strokeStyle = '#d63384'; ctx.stroke();
+
+            // Basic Underwear (so she's not completely naked)
+            ctx.fillStyle = 'white';
+            ctx.fillRect(170, 350, 60, 30);
+        }
+
+        function drawShoes(styleIdx) {
+            const color = '#333'; // Default black shoes
+            ctx.fillStyle = color;
+            if(styleIdx === 1) { // Flats
+                 drawOval(175, 535, 45, 20, color);
+                 drawOval(225, 535, 45, 20, color);
+            } else if (styleIdx === 2) { // Boots
+                ctx.fillRect(155, 510, 40, 35);
+                ctx.fillRect(205, 510, 40, 35);
+            }
+            // styleIdx 0 is barefoot
+        }
+
+        function drawDress(styleIdx, colorIdx) {
+             const color = options.dressColors[colorIdx];
+             ctx.fillStyle = color;
+             ctx.strokeStyle = '#c94f7c'; // darker outline
+
+             if (styleIdx === 0) { // Casual Shirt & Skirt
+                ctx.fillRect(160, 220, 80, 130); // Shirt
+                ctx.fillStyle = color; ctx.filter = 'brightness(80%)'; // Darker skirt
+                ctx.beginPath(); ctx.moveTo(160, 350); ctx.lineTo(240, 350); ctx.lineTo(260, 450); ctx.lineTo(140, 450); ctx.fill();
+                ctx.filter = 'none';
+             } else if (styleIdx === 1) { // Long Gown
+                ctx.beginPath();
+                ctx.moveTo(160, 220); ctx.lineTo(240, 220); // Top
+                ctx.lineTo(280, 520); ctx.lineTo(120, 520); // Bottom flare
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+             } else if (styleIdx === 2) { // Short Party Dress
+                 drawOval(200, 280, 90, 130, color); // Bodice
+                 ctx.beginPath(); ctx.arc(200, 380, 70, Math.PI, 0); ctx.fill(); // Skirt fluff
+             } else if (styleIdx === 3) { // Overalls
+                 ctx.fillStyle = '#54a0ff'; // Denim color fixed
+                 ctx.fillRect(165, 240, 70, 140); // Bib body
+                 ctx.fillRect(160, 380, 35, 100); // Leg 1
+                 ctx.fillRect(205, 380, 35, 100); // Leg 2
+                 ctx.fillStyle = color; // Shirt color underneath
+                 ctx.fillRect(160, 220, 80, 40);
+             }
+        }
+
+        function drawHair(styleIdx, colorIdx) {
+            const color = options.hairColors[colorIdx];
+            ctx.fillStyle = color;
+
+            if (styleIdx === 0) { // Long Wavy
+                drawOval(200, 140, 110, 130, color); // Top Base
+                drawOval(160, 200, 50, 180, color); // Side Left
+                drawOval(240, 200, 50, 180, color); // Side Right
+            } else if (styleIdx === 1) { // Short Bob
+                drawOval(200, 140, 110, 140, color);
+                ctx.fillRect(150, 130, 100, 60); // Bangs
+            } else if (styleIdx === 2) { // Bun (Juda)
+                drawOval(200, 130, 105, 110, color); // Tight base
+                drawOval(200, 80, 60, 60, color); // Top bun
+            } else if (styleIdx === 3) { // Ponytail
+                drawOval(200, 130, 105, 110, color); // Base
+                drawOval(260, 160, 40, 120, color); // Tail on side
+            }
+            // Redraw face features over hair bangs if needed
+            if(styleIdx === 1) {
+                 ctx.fillStyle = '#fff'; drawOval(180, 145, 20, 15, '#fff'); drawOval(220, 145, 20, 15, '#fff');
+                 ctx.fillStyle = '#6D4C41'; drawOval(180, 145, 8, 8, '#6D4C41'); drawOval(220, 145, 8, 8, '#6D4C41');
+            }
+        }
+
+        function drawAccessories(styleIdx) {
+             if (styleIdx === 1) { // Necklace
+                ctx.beginPath();
+                ctx.arc(200, 210, 25, 0, Math.PI);
+                ctx.lineWidth = 5; ctx.strokeStyle = '#FFD700'; ctx.stroke(); // Gold
+                drawOval(200, 235, 10, 10, 'red'); // Jewel
+             } else if (styleIdx === 2) { // Crown
+                 ctx.fillStyle = '#FFD700';
+                 ctx.beginPath();
+                 ctx.moveTo(160, 100); ctx.lineTo(180, 70); ctx.lineTo(200, 90); ctx.lineTo(220, 70); ctx.lineTo(240, 100);
+                 ctx.closePath(); ctx.fill();
+             }
+             // 0 is none
+        }
+
+
+        // --- Main Game Loop ---
+        function drawGame() {
+            // 1. Clear Screen
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Draw Layers in Order (Bottom to Top)
+            drawBaseDoll();
+            drawShoes(gameState.shoeStyle);
+            drawDress(gameState.dressStyle, gameState.dressColor);
+            drawHair(gameState.hairStyle, gameState.hairColor);
+            drawAccessories(gameState.accStyle);
+        }
+
+        // Initial Draw on Page Load
+        window.onload = drawGame;
+
+    </script>
+</body>
+</html>
