@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Witching Hour: The Curse of the Sleepwalker</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Pixelify Sans', cursive; /* Ek pixel art font maan kar chal rahe hain */
+        }
+        #game-container {
+            width: 800px; /* Ya jo bhi aapki game resolution ho */
+            height: 600px;
+            border: 2px solid white;
+            position: relative;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            color: white;
+            text-align: center;
+        }
+        #start-screen, #game-screen, #team-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-size: cover;
+            background-position: center;
+        }
+        #start-screen {
+            background-image: url('witch-start-screen.png'); /* Yahin aapki witch ki image hogi */
+            display: flex; /* Default show */
+        }
+        #game-screen {
+            background-image: url('bedroom-scene.png'); /* Bedroom image */
+            display: none;
+            justify-content: flex-end;
+            align-items: flex-start;
+            padding-bottom: 50px;
+            padding-left: 50px;
+        }
+        #team-screen {
+            background-image: url('team-scene.png'); /* Team fighting witch image */
+            display: none;
+        }
+        .start-button {
+            padding: 15px 30px;
+            font-size: 24px;
+            background-color: #ff4500;
+            color: white;
+            border: 5px outset #ffa500;
+            cursor: pointer;
+            text-shadow: 2px 2px #8b0000;
+            box-shadow: 4px 4px #8b0000;
+            transition: transform 0.1s;
+        }
+        .start-button:active {
+            transform: translateY(2px);
+            box-shadow: 2px 2px #8b0000;
+            border: 5px inset #ffa500;
+        }
+        .character-name {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+            text-shadow: 2px 2px #333;
+        }
+        .dialogue-box {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid #fff;
+            padding: 20px;
+            margin-top: auto; /* Push to bottom */
+            width: 80%;
+            font-size: 18px;
+            text-align: left;
+            box-sizing: border-box;
+        }
+        .team-count {
+            font-size: 48px;
+            color: gold;
+            text-shadow: 3px 3px #a52a2a;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="start-screen">
+            <h1 class="character-name" style="margin-top: 100px;">WITCHING HOUR:</h1>
+            <h2 class="character-name">THE CURSE OF THE SLEEPWALKER</h2>
+            <button class="start-button" onclick="startGame()">START GAME</button>
+        </div>
+
+        <div id="game-screen">
+            <div class="dialogue-box">
+                "Ugh... my head. Where am I? And who is this man?"
+            </div>
+            </div>
+
+        <div id="team-screen">
+            <h1 class="character-name">Our Heroes Arrive!</h1>
+            <p class="team-count">Team Members: 2,00,000</p>
+            <button class="start-button" onclick="resetGame()" style="margin-top: 50px;">Fight Again!</button>
+        </div>
+    </div>
+
+    <script>
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            // Yahan par aap thodi der baad uncle ko uthane ka logic dal sakte hain
+            setTimeout(() => {
+                document.getElementById('game-screen').style.display = 'none';
+                document.getElementById('team-screen').style.display = 'flex';
+            }, 3000); // 3 seconds baad team screen dikhao
+        }
+
+        function resetGame() {
+            document.getElementById('team-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
