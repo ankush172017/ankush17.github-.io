@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trump & Modi vs Chudail Battle</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&display=swap');
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background: #000; font-family: 'Creepster', cursive;
+        }
+
+        .screen {
+            position: absolute; width: 100%; height: 100%;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            background-size: cover; background-position: center;
+        }
+
+        /* --- 1. START SCREEN --- */
+        #start-screen {
+            display: flex;
+            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1509248961158-e54f6934749c?q=80&w=1000&auto=format&fit=crop');
+        }
+        h1 { color: #ff0000; font-size: 80px; text-shadow: 0 0 20px #000; margin: 0; }
+        .btn-start {
+            margin-top: 30px; padding: 20px 60px; font-size: 40px; color: white;
+            background: #8B0000; border: 5px solid #fff; cursor: pointer; border-radius: 50px;
+            box-shadow: 0 0 30px red; transition: 0.3s;
+        }
+
+        /* --- 2. BEDROOM SCREEN --- */
+        #bedroom-screen { background: #1a1a1a; }
+        .bed { width: 450px; z-index: 1; }
+        .uncle {
+            width: 250px; position: absolute; top: 10%; opacity: 0;
+            transition: 3s; filter: drop-shadow(0 0 15px red) grayscale(1);
+        }
+
+        /* --- 3. BATTLE SCREEN --- */
+        #battle-screen {
+            background-image: url('https://img.freepik.com/free-photo/creepy-night-forest-with-mist_23-2150916053.jpg');
+        }
+        .witch-container { position: relative; width: 300px; margin-top: -100px; }
+        .witch { width: 100%; animation: float 3s infinite ease-in-out; filter: drop-shadow(0 0 30px green); }
+        
+        /* Health Bar */
+        .hp-bar { width: 400px; height: 30px; background: #333; border: 3px solid white; border-radius: 20px; overflow: hidden; margin-bottom: 20px; }
+        #hp-fill { width: 100%; height: 100%; background: linear-gradient(to right, red, #ff4d4d); transition: 0.2s; }
+
+        /* Heroes */
+        .hero-team {
+            display: flex; justify-content: center; align-items: flex-end;
+            position: absolute; bottom: 20px; width: 100%; gap: 100px;
+        }
+        .hero { position: relative; width: 220px; text-align: center; }
+        .hero img { width: 100%; filter: drop-shadow(0 0 10px gold); }
+        .gun { 
+            position: absolute; width: 100px !important; right: -40px; top: 40%; 
+            transform: rotate(-10deg); filter: drop-shadow(0 0 5px black) !important;
+        }
+
+        .team-counter {
+            position: absolute; top: 20px; left: 20px; padding: 15px;
+            background: rgba(0,0,0,0.8); border: 2px solid gold; color: gold; font-size: 25px;
+        }
+
+        .btn-attack {
+            position: absolute; bottom: 320px; padding: 15px 50px; font-size: 30px;
+            background: #ffcc00; color: #000; border: none; border-radius: 10px;
+            cursor: pointer; font-weight: bold; font-family: sans-serif;
+            box-shadow: 0 10px 0 #b38f00;
+        }
+        .btn-attack:active { transform: translateY(5px); box-shadow: 0 5px 0 #b38f00; }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-40px); } }
+
+        .bullet {
+            position: absolute; width: 20px; height: 6px; background: yellow;
+            border-radius: 5px; box-shadow: 0 0 10px orange;
+            animation: shoot 0.4s linear forwards;
+        }
+        @keyframes shoot { to { transform: translateY(-400px); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="screen">
+        <h1 style="font-family: 'Nosifer', cursive;">CHUDAIL KA KHAUF</h1>
+        <button class="btn-start" onclick="goBedroom()">START GAME</button>
+    </div>
+
+    <div id="bedroom-screen" class="screen">
+        <img src="https://www.pngall.com/wp-content/uploads/8/Scary-Face-PNG-Image.png" class="uncle" id="uncle-img">
+        <img src="https://www.pngall.com/wp-content/uploads/2016/07/Bed-Free-PNG-Image.png" class="bed">
+        <h2 id="story-text" style="color: white; margin-top: 20px; font-size: 30px;">Aap so rahe hain...</h2>
+    </div>
+
+    <div id="battle-screen" class="screen">
+        <div class="team-counter">ARMY: <span id="count">0</span> / 2,00,000</div>
+        
+        <div class="hp-bar"><div id="hp-fill"></div></div>
+
+        <div class="witch-container" id="witch-box">
+            <img src="https://www.pngarts.com/files/3/Horror-Witch-PNG-Image-Transparent-Background.png" class="witch">
+        </div>
+
+        <button class="btn-attack" onclick="shoot()">🔥 ATTACK! 🔥</button>
+
+        <div class="hero-team">
+            <div class="hero">
+                <img src="https://www.pngall.com/wp-content/uploads/2016/06/Donald-Trump-PNG-File.png">
+                <img src="https://www.pngall.com/wp-content/uploads/2016/05/Gun-PNG-Clipart.png" class="gun">
+                <div style="background:blue; color:white;">COMMANDER TRUMP</div>
+            </div>
+            <div class="hero">
+                <img src="https://www.pngall.com/wp-content/uploads/15/Narendra-Modi-PNG-Picture.png">
+                <img src="https://www.pngall.com/wp-content/uploads/2016/05/Gun-PNG-Clipart.png" class="gun">
+                <div style="background:orange; color:white;">COMMANDER MODI</div>
+            </div>
+        </div>
+        
+        <h1 id="win" style="display:none; color:gold; background:rgba(0,0,0,0.9); padding:50px; border:10px solid gold;">VICTORY! CHUDAIL MAR GAYI!</h1>
+    </div>
+
+    <script>
+        let health = 100;
+
+        function goBedroom() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('bedroom-screen').style.display = 'flex';
+            
+            setTimeout(() => {
+                document.getElementById('uncle-img').style.opacity = '1';
+                document.getElementById('story-text').innerText = "DARAVANE UNCLE NE UTHA LIYA!";
+                document.getElementById('story-text').style.color = "red";
+            }, 2000);
+
+            setTimeout(goBattle, 5000);
+        }
+
+        function goBattle() {
+            document.getElementById('bedroom-screen').style.display = 'none';
+            document.getElementById('battle-screen').style.display = 'flex';
+            
+            let c = 0;
+            let timer = setInterval(() => {
+                c += 4000;
+                if(c >= 200000) { c = 200000; clearInterval(timer); }
+                document.getElementById('count').innerText = c.toLocaleString();
+            }, 30);
+        }
+
+        function shoot() {
+            if(health <= 0) return;
+
+            // Bullet Effects
+            for(let i=0; i<2; i++) {
+                let b = document.createElement('div');
+                b.className = 'bullet';
+                b.style.left = (40 + (i*20)) + "%";
+                b.style.bottom = "150px";
+                document.getElementById('battle-screen').appendChild(b);
+                setTimeout(() => b.remove(), 400);
+            }
+
+            // Damage
+            health -= 10;
+            document.getElementById('hp-fill').style.width = health + "%";
+            
+            // Witch reaction
+            const w = document.getElementById('witch-box');
+            w.style.transform = "scale(1.2) rotate(10deg)";
+            w.style.filter = "brightness(3) hue-rotate(90deg)";
+            setTimeout(() => {
+                w.style.transform = "scale(1)";
+                w.style.filter = "drop-shadow(0 0 30px green)";
+            }, 100);
+
+            if(health <= 0) {
+                document.getElementById('witch-box').style.display = 'none';
+                document.querySelector('.btn-attack').style.display = 'none';
+                document.getElementById('win').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
