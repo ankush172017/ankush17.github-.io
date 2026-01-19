@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure Access Portal</title>
+    <style>
+        /* CSS: Yeh page ko design karta hai */
+        body {
+            background-color: #0d0d0d; /* Kali Linux Dark Background */
+            color: #00ff00; /* Matrix Green Text */
+            font-family: 'Courier New', monospace; /* Hacker Font */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-box {
+            background: #1a1a1a;
+            padding: 40px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            width: 300px;
+            text-align: center;
+        }
+
+        h2 { margin-bottom: 20px; letter-spacing: 2px; }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #000;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        input:focus { border-color: #00ff00; }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #008000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        button:hover { background: #00ff00; color: black; }
+
+        .error-msg {
+            color: red;
+            font-size: 12px;
+            display: none; /* JavaScript se control hoga */
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h2>SYSTEM ACCESS</h2>
+        
+        <form id="loginForm" onsubmit="return validateForm()">
+            <input type="text" id="username" placeholder="Username / ID">
+            <input type="password" id="password" placeholder="Password">
+            
+            <button type="submit">AUTHENTICATE</button>
+            
+            <p id="error-text" class="error-msg">ACCESS DENIED: Invalid Credentials</p>
+        </form>
+    </div>
+
+    <script>
+        // JavaScript: Yeh client-side verification karta hai
+        function validateForm() {
+            var user = document.getElementById("username").value;
+            var pass = document.getElementById("password").value;
+            var error = document.getElementById("error-text");
+
+            // Hacker Lesson: Yeh "Client Side Validation" hai.
+            // Isse aasani se bypass kiya ja sakta hai kyunki yeh browser mein run hota hai.
+            if (user == "" || pass == "") {
+                error.style.display = "block";
+                error.innerText = "Error: Fields cannot be empty!";
+                return false; // Form submit hone se rokta hai
+            }
+            
+            alert("Checking Database for: " + user);
+            return true;
+        }
+    </script>
+
+</body>
+</html>
