@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>Modi-Trump vs Chudail Final</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Creepster', cursive; }
+        .screen { position: absolute; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; background-size: cover; background-position: center; }
+
+        /* Start */
+        #start-screen { display: flex; background: radial-gradient(circle, #600, #000); }
+        .btn-start { padding: 20px 60px; font-size: 35px; background: red; color: white; border: 4px solid gold; cursor: pointer; border-radius: 10px; box-shadow: 0 0 20px red; }
+
+        /* Bedroom */
+        #bedroom-screen { background: #111; }
+        .uncle-img { width: 250px; position: absolute; top: 10%; opacity: 0; transition: 2s; border: 4px solid white; border-radius: 50%; }
+        .bed-img { width: 450px; margin-top: 100px; }
+
+        /* Fight */
+        #fight-screen { background-image: url('https://img.freepik.com/free-photo/misty-forest-landscape_23-2150916053.jpg'); }
+        .witch { width: 300px; filter: drop-shadow(0 0 30px green); animation: float 2s infinite ease-in-out; }
+        .hp-bar { width: 350px; height: 30px; background: #333; border: 2px solid #fff; border-radius: 20px; margin-bottom: 20px; overflow: hidden; }
+        #hp-fill { width: 100%; height: 100%; background: red; transition: 0.3s; }
+
+        /* Commanders (Trump & Modi) */
+        .hero-team { display: flex; gap: 50px; position: absolute; bottom: 10px; }
+        .commander { width: 200px; position: relative; }
+        .commander img { width: 100%; border: 4px solid gold; border-radius: 15px; background: rgba(0,0,0,0.5); }
+        .gun { position: absolute; width: 90px; top: 40%; right: -30px; transform: rotate(-10deg); filter: drop-shadow(0 0 5px black); }
+
+        .army-info { position: absolute; top: 20px; left: 20px; background: gold; color: black; padding: 10px 20px; font-size: 24px; border: 3px solid black; }
+        .attack-btn { padding: 15px 40px; font-size: 30px; background: orange; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 250px; }
+        
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-40px); } }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="screen">
+        <h1 style="font-size: 70px; color: yellow;">CHUDAIL KA KHATMA 😡</h1>
+        <button class="btn-start" onclick="goBed()">START GAME</button>
+    </div>
+
+    <div id="bedroom-screen" class="screen">
+        
+        <img src="https://www.pngall.com/wp-content/uploads/8/Scary-Face-PNG-Image.png" class="uncle-img" id="uncle">
+        <img src="https://www.pngall.com/wp-content/uploads/2016/07/Bed-Free-PNG-Image.png" class="bed-img">
+        <h2 id="msg">Aap so rahe hain... Chain ki neend...</h2>
+    </div>
+
+    <div id="fight-screen" class="screen">
+        <div class="army-info">ARMY SIZE: <span id="count">0</span> / 2,00,000</div>
+        <div class="hp-bar"><div id="hp-fill"></div></div>
+        
+        
+
+[Image of a scary witch cartoon]
+
+        <img src="https://www.pngarts.com/files/3/Horror-Witch-PNG-Image-Transparent-Background.png" class="witch" id="witchImg">
+
+        <button class="attack-btn" onclick="attack()">🔥 ATTACK WITH GUN 🔥</button>
+
+        <div class="hero-team">
+            <div class="commander">
+                
+                <img src="https://www.pngall.com/wp-content/uploads/2016/06/Donald-Trump-PNG-File.png">
+                <img src="https://www.pngall.com/wp-content/uploads/2016/05/Gun-PNG-Clipart.png" class="gun">
+                <p style="color:cyan">TRUMP (GUNS)</p>
+            </div>
+
+            <div class="commander">
+                
+                <img src="https://www.pngall.com/wp-content/uploads/15/Narendra-Modi-PNG-Picture.png">
+                <img src="https://www.pngall.com/wp-content/uploads/2016/05/Gun-PNG-Clipart.png" class="gun">
+                <p style="color:orange">MODI (GUNS)</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let hp = 100;
+
+        function goBed() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('bedroom-screen').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('uncle').style.opacity = '1';
+                document.getElementById('msg').innerText = "UNCLE NE UTHA LIYA! JUNG SHURU!";
+                document.getElementById('msg').style.color = "red";
+            }, 2000);
+            setTimeout(goFight, 5000);
+        }
+
+        function goFight() {
+            document.getElementById('bedroom-screen').style.display = 'none';
+            document.getElementById('fight-screen').style.display = 'flex';
+            let c = 0;
+            let timer = setInterval(() => {
+                c += 4000;
+                if(c >= 200000) { c = 200000; clearInterval(timer); }
+                document.getElementById('count').innerText = c.toLocaleString();
+            }, 30);
+        }
+
+        function attack() {
+            if(hp <= 0) return;
+            hp -= 10;
+            document.getElementById('hp-fill').style.width = hp + "%";
+            
+            const w = document.getElementById('witchImg');
+            w.style.transform = "scale(1.2) rotate(10deg)";
+            w.style.filter = "brightness(3)";
+            setTimeout(() => {
+                w.style.transform = "scale(1)";
+                w.style.filter = "drop-shadow(0 0 30px green)";
+            }, 100);
+
+            if(hp <= 0) alert("VICTORY! Donald Trump, Modi Ji aur 2 Lakh Team Jeet Gayi!");
+        }
+    </script>
+</body>
+</html>
