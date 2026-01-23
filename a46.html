@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Scientists Archive</title>
+    <style>
+        /* CSS Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+        header {
+            background-color: #1a237e;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .controls {
+            margin-top: 15px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #ffca28;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* Grid Layout */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 10px;
+        }
+
+        /* Scientist Card */
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #ddd;
+        }
+        .card-body {
+            padding: 15px;
+            flex-grow: 1;
+        }
+        .name {
+            font-size: 1.4em;
+            color: #1a237e;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .field {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        .speech-box {
+            background: #f9f9f9;
+            padding: 10px;
+            border-left: 4px solid #1a237e;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .speech-eng {
+            font-size: 0.95em;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .speech-hin {
+            font-size: 0.95em;
+            color: #d84315; /* Reddish for Hindi to distinguish */
+            font-family: 'Nirmala UI', sans-serif;
+        }
+        .id-badge {
+            background: #eee;
+            font-size: 0.8em;
+            padding: 2px 6px;
+            border-radius: 4px;
+            float: right;
+        }
+        
+        #loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Global Scientist Database</h1>
+    <p>Collection of World's Greatest Minds</p>
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="Search Scientist Name..." onkeyup="filterScientists()">
+        <span style="margin-left: 10px; color: #ccc;">Total Records: 2,00,000+</span>
+    </div>
+</header>
+
+<div class="container" id="scientistGrid">
+    </div>
+
+<div id="loading">Loading more scientists...</div>
+<div style="text-align: center; margin-bottom: 50px;">
+    <button onclick="loadMore()">Load Next 20 Scientists</button>
+</div>
+
+<script>
+    // 1. DATA SAMPLE (सिर्फ उदाहरण के लिए कुछ असली नाम, बाकी हम कोड से जनरेट करेंगे)
+    // असली प्रोजेक्ट में यह डेटा Database (SQL/MongoDB) से आएगा।
+    const sampleData = [
+        {
+            name: "Dr. A.P.J. Abdul Kalam",
+            field: "Aerospace Scientist",
+            img: "https://upload.wikimedia.org/wikipedia/commons/6/6e/A._P._J._Abdul_Kalam.jpg",
+            eng: "You have to dream before your dreams can come true.",
+            hin: "सपनों के सच होने से पहले आपको सपने देखने होंगे।"
+        },
+        {
+            name: "Albert Einstein",
+            field: "Theoretical Physicist",
+            img: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg",
+            eng: "Imagination is more important than knowledge.",
+            hin: "ज्ञान से ज्यादा महत्वपूर्ण कल्पना है।"
+        },
+        {
+            name: "Marie Curie",
+            field: "Physicist & Chemist",
+            img: "https://upload.wikimedia.org/wikipedia/commons/7/7e/Marie_Curie_c1920.jpg",
+            eng: "Nothing in life is to be feared, it is only to be understood.",
+            hin: "जीवन में किसी भी चीज़ से डरना नहीं चाहिए, उसे केवल समझा जाना चाहिए।"
+        },
+        {
+            name: "Nikola Tesla",
+            field: "Electrical Engineer",
+            img: "https://upload.wikimedia.org/wikipedia/commons/7/79/Tesla_circa_1890.jpeg",
+            eng: "I don't care that they stole my idea . . I care that they don't have any of their own.",
+            hin: "मुझे परवाह नहीं है कि उन्होंने मेरा विचार चुरा लिया... मुझे परवाह है कि उनके पास अपना कोई विचार नहीं है।"
+        },
+        {
+            name: "C.V. Raman",
+            field: "Physicist",
+            img: "https://upload.wikimedia.org/wikipedia/commons/e/e6/Sir_C._V._Raman.jpg",
+            eng: "Treat me right and you will see the light.",
+            hin: "मेरे साथ सही व्यवहार करो और तुम्हें प्रकाश दिखाई देगा।"
+        }
+    ];
+
+    // 2. GENERATE FAKE DATA (2 लाख दिखाने के लिए हम डेटा को रिपीट करेंगे)
+    // असली दुनिया में यहां API Call होगी।
+    let allScientists = [];
+    
+    // मान लेते हैं हम 200,000 एंट्री बना रहे हैं (Simulation)
+    // लेकिन ब्राउज़र बचाने के लिए हम सिर्फ Logic दिखा रहे हैं।
+    for(let i = 0; i < 500; i++) { // Demo ke liye 500 bana rahe hain
+        let randomScientist = sampleData[i % sampleData.length];
+        allScientists.push({
+            id: i + 1,
+            name: randomScientist.name, // In reality, names would be different
+            field: randomScientist.field,
+            img: randomScientist.img,
+            eng: randomScientist.eng,
+            hin: randomScientist.hin
+        });
+    }
+
+    // 3. RENDER FUNCTION (Screen par dikhana)
+    const grid = document.getElementById('scientistGrid');
+    let loadedCount = 0;
+    const itemsPerLoad = 20;
+
+    function renderCards() {
+        let max = Math.min(loadedCount + itemsPerLoad, allScientists.length);
+        
+        for (let i = loadedCount; i < max; i++) {
+            let s = allScientists[i];
+            let card = `
+                <div class="card">
+                    <img src="${s.img}" alt="${s.name}">
+                    <div class="card-body">
+                        <span class="id-badge">#${s.id}</span>
+                        <div class="name">${s.name}</div>
+                        <div class="field">${s.field}</div>
+                        <div class="speech-box">
+                            <div class="speech-eng"><strong>Eng:</strong> "${s.eng}"</div>
+                            <div class="speech-hin"><strong>Hin:</strong> "${s.hin}"</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            grid.innerHTML += card;
+        }
+        loadedCount = max;
+    }
+
+    // 4. LOAD MORE FUNCTION
+    function loadMore() {
+        document.getElementById('loading').style.display = 'block';
+        setTimeout(() => { // Fake delay to simulate server
+            renderCards();
+            document.getElementById('loading').style.display = 'none';
+        }, 500);
+    }
+
+    // 5. SEARCH FUNCTION
+    function filterScientists() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let cards = document.getElementsByClassName('card');
+        
+        for (let i = 0; i < cards.length; i++) {
+            let name = cards[i].getElementsByClassName('name')[0].innerText.toLowerCase();
+            if (name.includes(input)) {
+                cards[i].style.display = "";
+            } else {
+                cards[i].style.display = "none";
+            }
+        }
+    }
+
+    // Initial Load
+    renderCards();
+
+</script>
+
+</body>
+</html>
