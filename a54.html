@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Horror Experience</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden; /* Scroll band karne ke liye */
+        }
+
+        #game-screen {
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            transition: background-image 1s ease-in-out;
+            position: relative;
+        }
+
+        /* Text Box Design */
+        #story-text {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 2px solid #8b0000;
+            width: 80%;
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px #8b0000;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: #222;
+            color: red;
+            border: 1px solid red;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        button:hover {
+            background: red;
+            color: black;
+        }
+
+        /* BHOOT (Jumpscare) Overlay */
+        #jumpscare {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=2574&auto=format&fit=crop'); /* Scary face placeholder */
+            background-size: cover;
+            background-position: center;
+            display: none; /* Pehle chhupa rahega */
+            z-index: 100;
+        }
+
+        .shake {
+            animation: shake 0.5s;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="https://freesound.org/data/previews/263/263026_4547247-lq.mp3" type="audio/mp3">
+    </audio>
+    <audio id="scream-sound">
+        <source src="https://freesound.org/data/previews/163/163443_2634356-lq.mp3" type="audio/mp3">
+    </audio>
+
+    <div id="game-screen">
+        <div id="jumpscare"></div>
+        <div id="story-text">Welcome. Andhere mein aapka swagat hai...</div>
+        <div class="buttons" id="btn-container">
+            <button onclick="startGame()">Game Start Karein</button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME LOGIC ---
+        
+        const screen = document.getElementById('game-screen');
+        const text = document.getElementById('story-text');
+        const btnContainer = document.getElementById('btn-container');
+        const jumpscareDiv = document.getElementById('jumpscare');
+        const bgMusic = document.getElementById('bg-music');
+        const screamSound = document.getElementById('scream-sound');
+
+        // Yahan aap apni Real Photos ke link daal sakte hain
+        const images = {
+            start: 'https://images.unsplash.com/photo-1505566782236-40742d4585f9?q=80&w=2670&auto=format&fit=crop', // Dark forest/house
+            hallway: 'https://images.unsplash.com/photo-1481018085669-2bc6e7f000c3?q=80&w=2670&auto=format&fit=crop', // Scary Corridor
+            room: 'https://images.unsplash.com/photo-1596627708514-633006a80479?q=80&w=2670&auto=format&fit=crop', // Abandoned Room
+            ghost: 'https://images.unsplash.com/photo-1605806616949-1e87b487bc2a?q=80&w=2574&auto=format&fit=crop' // The Ghost
+        };
+
+        // Screen pehle wali image set karein
+        screen.style.backgroundImage = `url('${images.start}')`;
+
+        function updateScene(message, buttons) {
+            text.innerHTML = message;
+            btnContainer.innerHTML = ''; // Purane button hatao
+            
+            buttons.forEach(btn => {
+                const buttonElement = document.createElement('button');
+                buttonElement.innerText = btn.text;
+                buttonElement.onclick = btn.action;
+                btnContainer.appendChild(buttonElement);
+            });
+        }
+
+        function startGame() {
+            bgMusic.play(); // Background music shuru
+            screen.style.backgroundImage = `url('${images.hallway}')`;
+            updateScene("Aap ek purane sunsaan ghar ke hallway mein hain. Saamne do darwaze hain.", [
+                { text: "Left Door kholo", action: goToRoom },
+                { text: "Right Door kholo", action: triggerJumpscare }
+            ]);
+        }
+
+        function goToRoom() {
+            screen.style.backgroundImage = `url('${images.room}')`;
+            updateScene("Ye kamra bahut ajeeb hai. Kone mein koi khada hai...", [
+                { text: "Paas ja kar dekho", action: triggerJumpscare },
+                { text: "Wapas bhago", action: startGame }
+            ]);
+        }
+
+        function triggerJumpscare() {
+            // Screen change to ghost
+            jumpscareDiv.style.backgroundImage = `url('${images.ghost}')`;
+            jumpscareDiv.style.display = 'block';
+            
+            // Awaaz play karo
+            screamSound.play();
+            
+            // Screen shake effect
+            screen.classList.add('shake');
+
+            // 3 second baad game over
+            setTimeout(() => {
+                jumpscareDiv.style.display = 'none';
+                screen.classList.remove('shake');
+                alert("GAME OVER! Bhoot ne apko pakad liya.");
+                location.reload(); // Game restart
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
