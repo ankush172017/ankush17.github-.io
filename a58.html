@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jumanji Horror Survival</title>
+    <style>
+        /* --- GAME DESIGN (DARK THEME) --- */
+        body {
+            background-color: #050505;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('https://www.transparenttextures.com/patterns/black-scales.png');
+        }
+
+        #game-box {
+            width: 100%;
+            max-width: 900px;
+            background: #111;
+            border: 2px solid #333;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.1); /* Green tint for Jumanji feel */
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        /* HEADER & STATS */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .player-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* USER PHOTO (SMILING) */
+        .user-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid #00ff00; /* Green border for hero */
+            object-fit: cover;
+        }
+
+        .locket-icon {
+            font-size: 2rem;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            animation: pulse 2s infinite;
+        }
+
+        /* MAIN SCREEN LAYOUT */
+        .screen-layout {
+            display: flex;
+            gap: 20px;
+            min-height: 350px;
+        }
+
+        .left-view, .right-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+        }
+
+        /* IMAGES STYLE */
+        .scene-img {
+            width: 100%;
+            max-width: 380px;
+            height: 250px;
+            object-fit: cover;
+            border: 2px solid #555;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .monster-img {
+            border-color: red;
+            box-shadow: 0 0 20px red;
+            animation: shake 0.5s infinite;
+        }
+
+        /* TEXT & BUTTONS */
+        .story-text {
+            background: #222;
+            padding: 10px;
+            border-left: 4px solid #00ff00;
+            margin-top: 10px;
+            width: 90%;
+        }
+
+        .btn {
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border: 1px solid #555;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: #555;
+        }
+
+        .btn-locket {
+            background: #004d00;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+            font-weight: bold;
+        }
+
+        .btn-locket:hover {
+            background: #00ff00;
+            color: black;
+        }
+
+        /* ANIMATIONS */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-1px, -2px); }
+            100% { transform: translate(0, 0); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="header">
+        <div class="player-profile">
+            <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200" alt="My Smiling Face" class="user-img" id="hero-img">
+            <div>
+                <h3 style="margin:0;">Player 1</h3>
+                <small style="color:#00ff00;">Status: Alive</small>
+            </div>
+        </div>
+        <div class="locket-container">
+            <span class="locket-icon">💎 JUMANJI LOCKET</span>
+        </div>
+    </div>
+
+    <div id="game-content">
+        </div>
+</div>
+
+<script>
+    const content = document.getElementById('game-content');
+
+    // --- IMAGES (Yahan Apni Photos Change Karein) ---
+    const assets = {
+        // Aapki Hasti hui photo
+        mySmile: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400', 
+        
+        // Ghar aur Family
+        familyHome: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=400', 
+        
+        // Bagal wala Darwaza (Side Door)
+        sideDoor: 'https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=400',
+        
+        // Monsters (Alag Alag)
+        monster1: 'https://images.unsplash.com/photo-1579682809318-32b3ae0b0539?q=80&w=400', // Creepy Face
+        monster2: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?q=80&w=400', // Zombie
+        
+        // Jumanji Magic Effect
+        magicBlast: 'https://images.unsplash.com/photo-1518531933037-9a847631312d?q=80&w=400' // Green Light
+    };
+
+    // --- SOUNDS (Optional) ---
+    const scream = new Audio('https://www.soundjay.com/human/sounds/human-scream-01.mp3');
+    const magicSound = new Audio('https://www.soundjay.com/button/sounds/button-3.mp3');
+
+    // --- GAME FUNCTIONS ---
+
+    function renderStart() {
+        content.innerHTML = `
+            <div class="screen-layout">
+                <div class="left-view">
+                    <img src="${assets.familyHome}" class="scene-img">
+                    <div class="story-text">यह मेरा घर है। सब लोग खुश हैं, लेकिन...</div>
+                </div>
+                <div class="right-view">
+                    <img src="${assets.sideDoor}" class="scene-img" style="border-color: #8b0000;">
+                    <div class="story-text">बगल वाले दरवाजे (Side Door) से अजीब आवाजें आ रही हैं।</div>
+                    <button class="btn" onclick="openDoor()">दरवाजा खोलो</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function openDoor() {
+        // Randomly choose a monster
+        const isMonster1 = Math.random() > 0.5;
+        const currentMonster = isMonster1 ? assets.monster1 : assets.monster2;
+
+        content.innerHTML = `
+            <div class="screen-layout">
+                <div class="left-view">
+                    <h2 style="color:red;">खतरा!!</h2>
+                    <div class="story-text">अचानक दरवाजा खुला और एक राक्षस सामने आ गया!</div>
+                    <br>
+                    <button class="btn btn-locket" onclick="useLocket()">🟢 USE JUMANJI LOCKET</button>
+                    <button class="btn" onclick="runAway()">भागो (Run)</button>
+                </div>
+                <div class="right-view">
+                    <img src="${currentMonster}" class="scene-img monster-img">
+                </div>
+            </div>
+        `;
+        scream.play();
+    }
+
+    function useLocket() {
+        magicSound.play();
+        content.innerHTML = `
+            <div class="screen-layout">
+                <div class="left-view">
+                    <img src="${assets.mySmile}" class="scene-img" style="border: 4px solid #00ff00;">
+                    <div class="story-text">हाहा! मेरा लॉकेट काम कर गया। मैं अभी भी हँस रहा हूँ।</div>
+                    <button class="btn" onclick="renderStart()">Play Again</button>
+                </div>
+                <div class="right-view">
+                    <img src="${assets.magicBlast}" class="scene-img">
+                    <h2 style="color:#00ff00;">BOOM!</h2>
+                    <div class="story-text">जुमांजी की शक्ति ने राक्षस को भस्म कर दिया!</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function runAway() {
+        content.innerHTML = `
+            <div class="screen-layout">
+                <div class="left-view">
+                    <h1 style="color:red; font-size:3rem;">GAME OVER</h1>
+                    <div class="story-text">आप लॉकेट इस्तेमाल करना भूल गए! राक्षस ने आपको पकड़ लिया।</div>
+                    <button class="btn" onclick="renderStart()">Try Again</button>
+                </div>
+                 <div class="right-view">
+                    <img src="${assets.monster1}" class="scene-img monster-img" style="filter: grayscale(100%);">
+                </div>
+            </div>
+        `;
+    }
+
+    // Start Game
+    renderStart();
+
+</script>
+
+</body>
+</html>
