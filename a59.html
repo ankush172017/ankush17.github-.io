@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>रियलिटी वाला डोरेमोन (Reality Doraemon)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        /* कॉमिक पैनल का डिज़ाइन */
+        .comic-container {
+            background-color: #fff;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+            border: 2px solid #ddd;
+        }
+
+        .scene-title {
+            background-color: #ffcc00;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        /* इमेज का डिज़ाइन - इसे रियलिटी लुक देने के लिए */
+        .reality-image-frame {
+            width: 100%;
+            height: 350px; /* इमेज की ऊंचाई */
+            background-color: #ddd;
+            overflow: hidden;
+        }
+
+        .reality-image-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* यह सुनिश्चित करता है कि फोटो फ्रेम में पूरी भरे */
+            transition: transform 0.3s ease;
+        }
+        
+        .reality-image-frame img:hover {
+            transform: scale(1.02); /* माउस ले जाने पर थोड़ा ज़ूम होगा */
+        }
+
+        /* डायलॉग बॉक्स का डिज़ाइन */
+        .dialogue-box {
+            padding: 20px;
+            background-color: #fafafa;
+        }
+
+        .speech {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            position: relative;
+            max-width: 80%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* कैरेक्टर के अनुसार रंग */
+        .doraemon {
+            background-color: #e3f2fd; /* हल्का नीला */
+            border-left: 5px solid #2196f3;
+            margin-right: auto;
+        }
+
+        .nobita {
+            background-color: #fff3e0; /* हल्का नारंगी/पीला */
+            border-left: 5px solid #ff9800;
+            margin-right: auto;
+        }
+
+        .shizuka { /* आपने सानिया कहा, पर डोरेमोन में वो शिजुका है */
+            background-color: #fce4ec; /* हल्का गुलाबी */
+            border-left: 5px solid #e91e63;
+            margin-left: auto; /* शिजुका दाईं तरफ से बोलेगी */
+        }
+
+        .name-tag {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .doraemon .name-tag { color: #2196f3; }
+        .nobita .name-tag { color: #d35400; }
+        .shizuka .name-tag { color: #e91e63; }
+
+    </style>
+</head>
+<body>
+
+    <h1>Reality Doraemon: एक दिन</h1>
+    <p style="text-align: center; color: #666;">(नोट: असली मज़ा लेने के लिए नीचे दी गई डमी तस्वीरों को अपनी बनाई हुई रियलिस्टिक AI तस्वीरों से बदलें।)</p>
+
+    <div class="comic-container">
+        <div class="scene-title">सीन 1: कुछ मज़ेदार (Funny)</div>
+        <div class="reality-image-frame">
+            <img src="https://via.placeholder.com/600x350.png?text=Reality+Scene+1:+Nobita+Lazy,+Doraemon+Sighing" alt="Funny Scene">
+        </div>
+        <div class="dialogue-box">
+            <div class="speech nobita">
+                <span class="name-tag">नोबिता (Nobita):</span>
+                डोरेमोन! यार, कोई ऐसा गैजेट निकालो ना कि मैं बिस्तर पर पड़ा रहूँ और मेरा होमवर्क अपने आप हो जाए! प्लीज़!
+            </div>
+            <div class="speech doraemon">
+                <span class="name-tag">डोरेमोन (Doraemon):</span>
+                (लंबी सांस लेते हुए) नोबिता... मेरे पास एक ऐसा गैजेट है जो तुम्हारी जगह 'सो' सकता है जब तुम होमवर्क करोगे। बोलो, चाहिए?
+            </div>
+        </div>
+    </div>
+
+
+    <div class="comic-container">
+        <div class="scene-title">सीन 2: कुछ इंटेलिजेंट (Intelligent)</div>
+        <div class="reality-image-frame">
+            <img src="https://via.placeholder.com/600x350.png?text=Reality+Scene+2:+Doraemon+explaining+complex+gadget" alt="Intelligent Scene">
+        </div>
+        <div class="dialogue-box">
+            <div class="speech doraemon">
+                <span class="name-tag">डोरेमोन (Doraemon):</span>
+                देखो नोबिता, यह 'क्वांटम-रियलिटी मैनिपुलेटर' है। यह आस-पास के स्पेस-टाइम के कणों को बदलकर वास्तविकता को थोड़ा मोड़ सकता है। यह बहुत जटिल विज्ञान है।
+            </div>
+            <div class="speech nobita">
+                <span class="name-tag">नोबिता (Nobita):</span>
+                हैं? 'क्वांटम' क्या? डोरेमोन, क्या इससे डोरा-केक जल्दी बन सकते हैं? मुझे बस इतना समझ आया।
+            </div>
+        </div>
+    </div>
+
+
+    <div class="comic-container">
+        <div class="scene-title">सीन 3: कुछ गुस्से वाला (Angry)</div>
+        <div class="reality-image-frame">
+            <img src="https://via.placeholder.com/600x350.png?text=Reality+Scene+3:+Doraemon+Angry,+Nobita+Crying,+Shizuka+Worried" alt="Angry Scene">
+        </div>
+        <div class="dialogue-box">
+            <div class="speech nobita">
+                <span class="name-tag">नोबिता (Nobita):</span>
+                (रोते हुए) डोरेमोन बचाओ! जियान ने मुझे फिर पीटा क्योंकि मैंने तुम्हारी 'टाइम मशीन' का ब्रेक तोड़ दिया!
+            </div>
+            <div class="speech doraemon">
+                <span class="name-tag">डोरेमोन (Doraemon):</span>
+                (एकदम लाल गुस्से में) तुमने क्या किया?! टाइम मशीन का ब्रेक?! तुम्हें पता है उसे ठीक करने में भविष्य के कितने साल लगेंगे? अब तुम खुद भुगतो जियान को! मैं नहीं आ रहा!
+            </div>
+            <div class="speech shizuka">
+                <span class="name-tag">शिजुका (Sania):</span>
+                अरे लड़कों, बस करो! नोबिता, तुम्हें सावधान रहना चाहिए था। और डोरेमोन, इतना गुस्सा ठीक नहीं है।
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
